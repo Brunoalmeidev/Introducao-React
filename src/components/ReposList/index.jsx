@@ -1,37 +1,47 @@
 import { useEffect, useState } from "react";
 
-const ReposList = () => {
+import styles from './ReposList.module.css';
+
+const ReposList = ({ nomeUsuario }) => {
     const [repos, setRepos] = useState([]);
     const [estaCarregando, setEstaCarregando] = useState(true);
 
     useEffect(() => {
-        fetch('https://api.github.com/users/Brunoalmeidev/repos')
+        setEstaCarregando(true);
+        fetch(`https://api.github.com/users/${nomeUsuario}/repos`)
             .then(res => res.json())
             .then(resJson => {
                 setTimeout(() => {
                     setEstaCarregando(false);
-                    setRepos(resJson);
-                }, 3000);
+                    setRepos(Array.isArray(resJson) ? resJson : []);
+                }, 2000);
 
             })
-    }, []);
+    }, [nomeUsuario]);
 
     return (
-        <>
-            {estaCarregando && (
+        <div className="container">
+            {estaCarregando ? (
                 <h1>Carregando...</h1>
+            ) : (
+                <ul className={styles.list}>
+                    {/* {repos.map(repositorio => ( */}
+                    {repos.map(({ id, name, language, html_url }) => (
+                        <li className={styles.listItem} key={id}>
+                            <div className={styles.itemName}>
+                                <b>Nome:</b>
+                                {name}
+                            </div>
+                            <div className={styles.itemLanguage}>
+                                <b>Linguagem:</b>
+                                {language}
+                            </div>
+                            <a className={styles.itemLink} target="_blank" rel="noopener noreferrer" href={html_url}>Visitar no Github</a>
+                        </li>
+                    ))}
+                </ul>
             )}
-            <ul>
-                {/* {repos.map(repositorio => ( */}
-                {repos.map(({ id, name, language, html_url }) => (
-                    <li key={id}>
-                        <b>Nome:</b> {name} <br />
-                        <b>Linguagem:</b> {language} <br />
-                        <a target="_blank" href={html_url}>Visitar no Github</a> <br />
-                    </li>
-                ))}
-            </ul>
-        </>
+        </div>
     )
 }
 
